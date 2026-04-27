@@ -229,25 +229,7 @@ class PythonFunctionTask(PythonAutoContainerTask[T]):  # type: ignore
 
     
 
-def execute(self, **kwargs) -> Any:
-    """
-    This method will be invoked to execute the task. If you do decide to override this method you must also
-    handle dynamic tasks or you will no longer be able to use the task as a dynamic task generator.
-    """
-    if self.execution_mode == self.ExecutionBehavior.DEFAULT:
-        start_time = time.time()
-        logger.info(f"[AUDIT] Task {self.name} started")
 
-        result = self._task_function(**kwargs)
-
-        end_time = time.time()
-        logger.info(f"[AUDIT] Task {self.name} finished")
-        logger.info(f"[AUDIT] Duration: {end_time - start_time} seconds")
-
-        return result
-
-    elif self.execution_mode == self.ExecutionBehavior.DYNAMIC:
-        return self.dynamic_execute(self._task_function, **kwargs)
 
     def _create_and_cache_dynamic_workflow(self):
         if self._wf is None:
