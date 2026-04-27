@@ -182,6 +182,28 @@ class PythonFunctionTask(PythonAutoContainerTask[T]):  # type: ignore
             )
         self._wf = None  # For dynamic tasks
 
+    def execute(self, **kwargs) -> Any:
+        """
+        This method will be invoked to execute the task.
+        """
+        if self.execution_mode == self.ExecutionBehavior.DEFAULT:
+            start_time = time.time()
+            logger.info(f"[AUDIT] Task {self.name} started")
+
+            result = self._task_function(**kwargs)
+
+            end_time = time.time()
+            logger.info(f"[AUDIT] Task {self.name} finished")
+            logger.info(f"[AUDIT] Duration: {end_time - start_time} seconds")
+
+            return result
+
+        elif self.execution_mode == self.ExecutionBehavior.DYNAMIC:
+            return self.dynamic_execute(self._task_function, **kwargs)
+
+
+
+
     @property
     def execution_mode(self) -> ExecutionBehavior:
         return self._execution_mode
@@ -205,8 +227,7 @@ class PythonFunctionTask(PythonAutoContainerTask[T]):  # type: ignore
             return f"{self.instantiated_in}.{self._name}"
         return self._name
 
-    from flytekit.loggers import logger
-import time
+    
 
 def execute(self, **kwargs) -> Any:
     """
