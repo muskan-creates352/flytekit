@@ -183,26 +183,25 @@ class PythonFunctionTask(PythonAutoContainerTask[T]):  # type: ignore
         self._wf = None  # For dynamic tasks
 
     def execute(self, **kwargs) -> Any:
-        """
-        This method will be invoked to execute the task.
-        """
-        if self.execution_mode == self.ExecutionBehavior.DEFAULT:
-            start_time = time.time()
-            logger.info(f"[AUDIT] Task {self.name} started")
+        start_time = time.time()
+        logger.info(f"[AUDIT] Task {self.name} started")
 
-            result = self._task_function(**kwargs)
+        try:
+            if self.execution_mode == self.ExecutionBehavior.DEFAULT:
+                result = self._task_function(**kwargs)
 
-            end_time = time.time()
-            logger.info(f"[AUDIT] Task {self.name} finished")
-            logger.info(f"[AUDIT] Duration: {end_time - start_time} seconds")
+            elif self.execution_mode == self.ExecutionBehavior.DYNAMIC:
+                result = self.dynamic_execute(self._task_function, **kwargs)
+
+            else:
+                result = self._task_function(**kwargs)
 
             return result
 
-        elif self.execution_mode == self.ExecutionBehavior.DYNAMIC:
-            return self.dynamic_execute(self._task_function, **kwargs)
-
-
-
+        finally:
+            end_time = time.time()
+            logger.info(f"[AUDIT] Task {self.name} finished")
+            logger.info(f"[AUDIT] Duration: {end_time - start_time} seconds")
 
     @property
     def execution_mode(self) -> ExecutionBehavior:
